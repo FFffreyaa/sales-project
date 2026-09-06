@@ -1,100 +1,82 @@
-# vinext-starter
+# 钱江电气销售项目管理 APP｜V0.1
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+这是一个以《DP-02 钱江电气销售项目与投标领域本体包 V1.2 双轨版》为主业务基线、以《销售项目生命周期对齐 Gate 补充基线》治理 Gate 口径的本地 V0.1。“采购意向 → S0/G1 → S1/G2 → S2需求与技术来源 → G3独立技术评审 → S3核价来源 → G4核价与价格授权 → S4投标包编制与独立专业评审 → G5商务决策 → 投标作业正式提交回执 → S5 → L2.9结果回传 → G6主管确认 → 中标合同接收/S6 或未成交关闭”已使用 Cloudflare D1 持久化，并记录不可变来源版本、价格授权、投标包、专业评审、正式结果、结构化复盘、中标基线、合同接收回执、外部任务、收发事件、Gate提交快照、领域事件和审计记录。
 
-## Prerequisites
+双轨活动的系统所有权以 [`ACTIVITY_OWNERSHIP_BASELINE.md`](./ACTIVITY_OWNERSHIP_BASELINE.md) 为准：ACT-SPM由本系统权威执行并持久化，ACT-BID由投标/专业系统执行，本系统只保存带来源系统和模拟标识的只读活动投影。禁止通过行动标题推断真实活动语义，也禁止销售角色代填专业结论。
 
-- Node.js `>=22.13.0`
+Gate 口径已通过 `LIFECYCLE_GATE_BASELINE.md` 单独治理：S0–S6 继续作为唯一销售项目生命周期，G1–G7 重新定义为各阶段出口 Gate；原 V1.2 的主业务流、L2.1–L2.9、双轨活动、对象血缘和系统边界保持不变。G1–G6主线已按新口径运行；G7已能接收下游只读状态事件，但经营关闭阈值和例外规则尚未获得可信定义，因此关闭能力受控未开放。
 
-## Quick Start
+它还不是生产系统：当前身份头仅用于本地双角色演示，尚未接入企业统一认证；不连接真实客户、投标、合同、订单、财务或钉钉系统。
+
+业务页面默认只读取D1持久化项目，不再把静态样例与真实录入项目合并。D1加载失败时系统明确报错，不以样例数据伪装成功；确需查看历史UI样例时必须使用 `/?data=sample`，页面会持续显示“静态样例模式”，且刷新/重置不会修改D1。主管阶段门中心只显示真实Gate实例，销售行动中心只汇总已持久化活动和版本异常。
+
+## 本地启动
+
+要求 Node.js `>=22.13.0`。
+
+Windows下可直接双击项目目录中的 `启动Demo.cmd`。脚本会自动执行D1迁移、构建并启动两个固定地址：
+
+- `http://127.0.0.1:3000/`：销售项目管理主系统，只面向销售员和销售主管。
+- `http://127.0.0.1:3010/`：本地集成测试台，集中模拟外部技术、核价、投标与合同系统；不是业务门户，也不是权威数据来源。
 
 ```bash
-npm install
-npm run dev
-npm run build
+pnpm install
+pnpm run db:migrate:local
+pnpm run preview:d1
+pnpm run lab:dev
 ```
 
-This starter does not use `wrangler.jsonc`.
+`pnpm run dev` 可用于日常主界面开发。验收真实 G1–G4 闭环时必须同时运行 D1 预览和集成测试台；`pnpm run preview:d1` 固定在 `127.0.0.1:3000` 启动主系统，`pnpm run lab:dev` 在 `127.0.0.1:3010` 启动外部专业系统模拟器。
 
-## Included Shape
+## 验证命令
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
-
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```bash
+pnpm run build
+pnpm test
+pnpm run lint
+pnpm run typecheck
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+## 演示页面
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+- 销售员行动工作台：四类行动筛选、证据化任务队列、项目化快捷记录、AI语音草稿、等待他人、个人项目范围与来源血缘
+- 销售主管决策工作台：五个可切换管理视角控制同一工作区；包含待决策、团队组合、重大风险、交标红区、阻断项和情境化Agent建议
+- S0–S6 阶段筛选与项目内阶段门；不同阶段不会跳转到同一默认项目
+- 销售项目列表与筛选
+- 项目立项向导与重复检查
+- 立项场景限定为国内正式招投标、国内客户询价/报价、国内EPC询价、海外伙伴/EPC询价，并持久化无歧义场景编码、采购请求、Party角色和机会指纹；EPC/伙伴多通路统一报价与受控例外已启用
+- 项目驾驶舱、客户关系、伙伴资源、活动行动
+- 需求/技术/核价/投标版本追溯与偏差控制
+- 阶段门审批、项目中标移交和丢标复盘
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+## 推荐演示路径
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+1. 在顶部切换“销售员 / 销售主管”，观察两套不同任务结构与权限按钮。
+2. 在销售员工作台切换“今日必须完成 / 待客户反馈 / 待内部响应 / 7日内交标”，观察行动队列原位更新。
+3. 在快捷入口先选择关联项目，再记录客户Touch，或使用AI语音录入生成待确认事实和后续行动。
+4. 在“我的项目与来源血缘”切换项目，查看来源记录 → LeadID → CommercialProjectID → SalesProjectID及继承上下文。
+5. 从今日行动进入“西南新能源升压站设备投标项目”，查看重大风险、客户关系缺口和资源缺口。
+6. 在“客户关系”新增一条商务决策链记录，再从关系缺口创建行动。
+7. 在“伙伴与资源”查看技术负责人缺失；切换主管后模拟指派并接受。
+8. 在“版本追溯”尝试正式提交，查看未批准偏差、资源和关系缺口造成的阻断。
+9. 切换主管批准偏差，观察一致性结论和阶段门重新计算；未关闭的其他缺口仍然保留。
+10. 返回主管工作台，依次点击上方五个视角；在“团队项目”中联动点击 S0–S6 与黄色健康分层，再从筛选结果进入项目。
+11. 进入“城投数据中心配电扩容项目”，模拟客户需求变更，观察技术、核价和投标版本进入重新评审。
+12. 进入“北方轨交牵引供电设备项目”，由主管分别演示中标基线移交或结构化丢标复盘，并使用“重置结果分支”回放。
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+## 角色边界
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+- 销售员：维护采购与客户事实、补充关系证据、新增行动、申请资源、发起阶段门和准备结果材料。
+- 销售主管：立项与经营阶段决策、资源配置、偏差审批、风险督办、确认中标或丢标结果；G3技术评审只能查看和督办，不能代替技术评审人。
+- 技术负责人：编制标准化需求、设计采用值、初步技术方案、澄清与偏差结论；技术评审人基于冻结快照独立确认 G3，编制人不得自审。关键参数缺失或澄清未闭环时不能通过。本地由3010集成测试台分别模拟编制与评审入口，3000主系统没有专业角色代操作按钮。
+- 投标管理 APP：本演示只引用其任务状态、负责人、投标版本、提交哈希和客户回执，不建设投标文件编制作业。
+- 合同、订单、交付、验收、开票和回款：可由3010集成测试台回传只读状态事件；销售项目APP不修改其业务状态。
 
-## Useful Commands
+## 当前持久化边界
 
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+- 已持久化：采购意向、四场景采购请求、客户Party角色、机会指纹、销售项目基本信息、伙伴需要性/候选关系/证据复核/贡献记录、G1–G6 Gate实例与决策、S1策略版本、客户关系记录、资源申请与角色指派、ACT-SPM经营行动及状态账本、项目经营风险及流转账本、G5剩余风险承接记录、客户需求与技术方案版本、技术澄清与偏差、报价设计BOM、价格快照、核价方案、外部任务、下游商业状态事件、集成收件箱/发件箱/处理日志、不可变Gate引用快照、领域事件和审计记录。
+- 已约束：G2–G6都从来源对象自动汇总并冻结引用，Gate页面不重复录入专业事实；销售Owner维护销售事实和发起申请，技术负责人编制且技术评审人独立确认G3，财务/价格授权人确认G4并形成底价/报价/通路/有效期授权，投标专员编制提交包且专业评审人独立评审，销售主管在G5一次性作出投/不投及提交授权，在G6一次性确认结果与移交/关闭分支。G5冻结未关闭经营风险；高/重大风险不新增第二个Gate，主管继续投/报时须在同一次决策中显式承接，承接不等于关闭，风险变更后必须重提。批准投标后项目保持S4，只有冻结批次全部通路取得匹配回执才能进入S5；EPC项目在S5逐通路接收结果，全部齐备且不存在多条中标冲突后才形成项目级结果。错误结果必须由销售Owner发起核实、投标责任人回传带来源的新版本，系统保留原结果并重新汇总，销售角色不能直接改写外部事实。赢单批准后项目保持S5，只有合同APP返回与中标基线哈希一致的接收回执才能进入S6；未成交必须先完成结构化复盘。不投分支不伪造 `BidSubmitted`。BR03、BR04、BR18、BR19、BR24、BR29、重复项目、并发重复审批和绕过Gate均受阻断。
+- 仍未真实接入或尚待规则确认：客户主数据匹配、伙伴外部主数据/资质源、企业资源池/负荷、除技术负责人外的资源申请类型、真实投标文件编制工具、G7经营关闭阈值与例外。技术、核价、价格例外、投标作业、合同接收及下游状态由独立3010测试台通过受控、幂等的演示事件回传，所有数据带有 `environment=demo`、`simulated=true` 标识。EPC G5已按冻结批次要求全部有效通路回执到齐后才推进S5；零回执时支持Owner申请、主管批准的受控解冻、旧任务取消和新Gate版本重提。首条正式回执后的后到询价与跨批次管理仍待企业确认。旧 S2/S3 出口接口返回410并指向G3/G4；旧表仅作为迁移历史保留。
 
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+部署就绪程度、GitHub检查项和Cloudflare生产阻断项见 [`DEPLOYMENT_READINESS.md`](./DEPLOYMENT_READINESS.md)。
+- 默认业务模式下左下角按钮只重新读取D1，不删除业务记录；显式静态样例模式下只重置样例内存，同样不修改D1。

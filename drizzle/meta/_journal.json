@@ -1,5 +1,223 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1787193418546,
+      "tag": "0000_dear_miek",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1787195727701,
+      "tag": "0001_small_molecule_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787201160328,
+      "tag": "0002_clean_morbius",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1787211298593,
+      "tag": "0003_previous_fantastic_four",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1787214705430,
+      "tag": "0004_simple_leech",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1787220000000,
+      "tag": "0005_s2_stage_exit",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1787223600000,
+      "tag": "0006_integration_lab",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1787227200000,
+      "tag": "0007_repair_invalid_s2_exit",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1787313600000,
+      "tag": "0008_s3_costing_flow",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1787320800000,
+      "tag": "0009_lifecycle_gate_alignment",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1787407200000,
+      "tag": "0010_g5_commercial_submission",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1787414400000,
+      "tag": "0011_g5_execution_completion",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1787500800000,
+      "tag": "0012_g6_result_handover",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1787587200000,
+      "tag": "0013_activity_ownership",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1787673600000,
+      "tag": "0014_activity_state_machine",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1787760000000,
+      "tag": "0015_activity_command_receipts",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1787846400000,
+      "tag": "0016_gate_activity_linkage",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1787932800000,
+      "tag": "0017_system_spm_lifecycle",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1788019200000,
+      "tag": "0018_epc_quotation_routes",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1788105600000,
+      "tag": "0019_epc_route_results",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1788192000000,
+      "tag": "0020_result_task_fanout",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1788278400000,
+      "tag": "0021_result_correction_lineage",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "6",
+      "when": 1788364800000,
+      "tag": "0022_g5_controlled_reopen",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1788451200000,
+      "tag": "0023_g5_reopen_decision_lock",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1788537600000,
+      "tag": "0024_sales_operating_register",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1788624000000,
+      "tag": "0025_g5_residual_risk_acceptance",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1788710400000,
+      "tag": "0026_scenario_party_governance",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "6",
+      "when": 1788796800000,
+      "tag": "0027_g7_downstream_projection",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "6",
+      "when": 1788883200000,
+      "tag": "0028_resource_candidates",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "6",
+      "when": 1788969600000,
+      "tag": "0029_lead_bid_integration",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "6",
+      "when": 1787632957461,
+      "tag": "0030_nifty_wendell_vaughn",
+      "breakpoints": true
+    }
+  ]
 }

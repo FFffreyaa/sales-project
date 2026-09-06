@@ -27,6 +27,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
+*.pid
 
 # env files (can opt-in for committing if needed)
 .env*
@@ -38,3 +40,19 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+/.openai/site-build.tar.gz
+*.tsbuildinfo
+.demo-server.*
+.vinext-dev.*.log
+.*.out.log
+.*.err.log
+.*.pid
+/dist-integration-lab/
+/.runtime/
+/.codex_tmp/
+
+# local data and generated review documents
+*.db
+*.sqlite
+*.sqlite3
+/*.docx

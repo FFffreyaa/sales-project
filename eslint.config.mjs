@@ -35,6 +35,9 @@ const eslintConfig = defineConfig([
         version: "detect",
       },
     },
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["error", { varsIgnorePattern: "^renderResources$" }],
+    },
   },
 ]);
 
