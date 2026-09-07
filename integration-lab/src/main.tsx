@@ -4,8 +4,12 @@ import type { ExternalTaskView, IntegrationEventType } from "../../packages/inte
 import leadSamples from "./fixtures/lead-samples.v1.json";
 import "./styles.css";
 
-const API = "http://127.0.0.1:3000/api/integration/lab";
-const headers = { "Content-Type": "application/json", "x-integration-key": "qj-local-integration-lab" };
+const isLocalDevelopment = import.meta.env.DEV;
+const mainSystemOrigin = isLocalDevelopment ? "http://127.0.0.1:3000" : "";
+const API = `${mainSystemOrigin}/api/integration/lab`;
+const headers: Record<string, string> = isLocalDevelopment
+  ? { "Content-Type": "application/json", "x-integration-key": "qj-local-integration-lab" }
+  : { "Content-Type": "application/json" };
 type LabState = { tasks: ExternalTaskView[]; events: Array<Record<string, unknown>>; outbox: Array<Record<string, unknown>>; environment: string; sourceSystem: string };
 type LeadSample = (typeof leadSamples)[number];
 
@@ -121,7 +125,7 @@ function App() {
         duplicateCheck: { status: "clear", checkedAt: new Date().toISOString(), basis: "线索侧查重结果只作为来源事实；销售项目仍按采购机会指纹执行幂等校验" },
         fieldProvenance: { fixtureId: `HTML-LEAD-${leadForm.sampleId}`, projectName: "线索管理HTML样本", customerName: "线索管理HTML样本", productScope: "线索描述", amount: "线索预估金额", requestRef: leadForm.requestRef ? "测试人员补充" : "未形成", scenarioCode: "线索APP维护" },
       };
-      const response = await fetch("http://127.0.0.1:3000/api/integration/lead/events", { method: "POST", headers, body: JSON.stringify(envelope) });
+      const response = await fetch(`${mainSystemOrigin}/api/integration/lead/events`, { method: "POST", headers, body: JSON.stringify(envelope) });
       const result = await response.json() as { error?: string; autoConverted?: boolean; project?: { projectCode?: string } };
       if (!response.ok) throw new Error(result.error ?? "线索事件发送失败");
       setMessage(result.autoConverted ? "异常：线索不应自动形成项目" : "线索及业务场景已进入3000待转化队列，需人工核对后生成S0/G1");
@@ -173,7 +177,7 @@ function App() {
   return <div className="shell">
     <header><div><span>LOCAL INTEGRATION LAB</span><h1>钱江电气｜外部系统集成测试台</h1><p>集中模拟技术、核价、财务授权、投标作业与合同系统的任务接受、专业结果和受控回执。</p></div><button onClick={() => void load()}>刷新任务</button></header>
     <div className="warning"><strong>仅本地测试，不是业务系统，也不是权威数据来源</strong><span>这里的操作均标记 environment=demo、simulated=true；3000 主系统只展示结果，不允许销售角色代做专业结论。</span></div>
-    <div className="connection"><i />{message}<code>主系统 127.0.0.1:3000</code><code>测试台 127.0.0.1:3010</code></div>
+    <div className="connection"><i />{message}<code>{isLocalDevelopment ? "主系统 127.0.0.1:3000" : "公开演示主系统（同站点）"}</code><code>{isLocalDevelopment ? "测试台 127.0.0.1:3010" : "外部协同测试台 /integration-lab/"}</code></div>
     <section className="lead-simulator lead-detailed"><div className="lead-title"><span>LEAD MANAGEMENT SIMULATOR</span><h2>线索管理｜待转化事件模拟</h2><p>12条样本来自老师提供的线索HTML。业务场景由线索APP维护并随事件传入；销售项目只核对，不重新推测，也不会自动创建S0。</p></div><label><span>HTML样本</span><select value={leadForm.sampleId} onChange={event => { const sample = leadSamples.find(item => String(item.id) === event.target.value); if (sample) setLeadForm(leadFormFrom(sample)); }}>{leadSamples.map(item => <option key={item.id} value={item.id}>{item.id}. {item.projectName}</option>)}</select></label><label><span>业务场景（线索APP维护）</span><select value={leadForm.suggestedScenarioCode} onChange={event => setLeadForm(current => ({ ...current, suggestedScenarioCode: event.target.value as typeof current.suggestedScenarioCode }))}><option value="">请选择业务场景</option><option value="SCN-01-DIRECT-BID">国内直接投标</option><option value="SCN-02-EPC-INQUIRY">国内EPC询价</option><option value="SCN-03-DIRECT-RFQ">国内客户直接询价</option><option value="SCN-04-OVERSEAS-PARTNER-EPC">海外伙伴/EPC询价</option></select></label><button disabled={busy || !leadForm.suggestedScenarioCode} onClick={() => void sendLead()}>发送到待转化队列</button><details><summary>编辑本次模拟线索的详细事实</summary><div className="lead-form-grid">
       <label><span>线索分类</span><select value={leadForm.leadCategory} onChange={event => setLeadForm(current => ({ ...current, leadCategory: event.target.value }))}><option>客户线索</option><option>项目线索</option><option>伙伴线索</option></select></label>
       <label><span>线索等级建议</span><select value={leadForm.grade} onChange={event => setLeadForm(current => ({ ...current, grade: event.target.value }))}><option>S</option><option>A</option><option>B</option><option>C</option></select></label>
@@ -256,7 +260,7 @@ function App() {
             <article><h3>2B. 发现承诺差异并退回</h3><p>退回不会推进S6，也不会覆盖已批准中标基线；销售项目必须定位差异来源并形成新的受控版本。</p><div className="form">{field("合同与最终承诺差异", contractReturn.differenceSummary, value => setContractReturn(current => ({ ...current, differenceSummary: value })))}{field("整改要求", contractReturn.remediationRequirement, value => setContractReturn(current => ({ ...current, remediationRequirement: value })))}{field("退回证据", contractReturn.evidenceRef, value => setContractReturn(current => ({ ...current, evidenceRef: value })))}</div><button disabled={busy || !reviewId || !payload.awardBaselineId || !payload.manifestHash || !contractReturn.differenceSummary.trim() || !contractReturn.remediationRequirement.trim() || !contractReturn.evidenceRef.trim()} onClick={() => void send("ContractHandoverReturned", { gateId: reviewId, awardBaselineId: String(payload.awardBaselineId), manifestHash: String(payload.manifestHash), ...contractReturn }, [contractReturn.evidenceRef])}>退回中标基线并阻止推进</button></article>
           </>}
           {selected.task_type === "DOWNSTREAM_STATUS_TRACKING" && selected.status === "accepted" && <article><h3>2. 回传一条下游权威状态</h3><p>状态原文按来源系统入账并只读展示。当前尚未确认G7经营关闭阈值，因此本测试台不会提供“关闭项目”按钮。</p><div className="form"><label><span>业务对象</span><select value={downstream.eventType} onChange={event => setDownstream(current => ({ ...current, eventType: event.target.value }))}><option value="ContractStatusReported">合同</option><option value="OrderStatusReported">订单</option><option value="DeliveryStatusReported">履约/交付</option><option value="AcceptanceStatusReported">验收</option><option value="InvoiceStatusReported">开票</option><option value="PaymentStatusReported">回款</option></select></label>{field("对象编号", downstream.objectRef, value => setDownstream(current => ({ ...current, objectRef: value })))}{field("来源状态原文", downstream.businessStatus, value => setDownstream(current => ({ ...current, businessStatus: value })))}<label><span>金额（元，可选）</span><input type="number" min="0" value={downstream.amountYuan} onChange={event => setDownstream(current => ({ ...current, amountYuan: event.target.value }))} /></label>{field("证据引用", downstream.evidenceRef, value => setDownstream(current => ({ ...current, evidenceRef: value })))}</div><button disabled={busy || !downstream.objectRef.trim() || !downstream.businessStatus.trim() || !downstream.evidenceRef.trim()} onClick={() => void send("DownstreamBusinessStatusReported", { eventType: downstream.eventType, objectRef: downstream.objectRef, businessStatus: downstream.businessStatus, amountYuan: downstream.amountYuan ? Number(downstream.amountYuan) : undefined, currency: downstream.currency, evidenceRef: downstream.evidenceRef }, [downstream.evidenceRef])}>回传只读状态事实</button></article>}
-          {["completed", "returned", "rejected", "cancelled"].includes(selected.status) && <div className="empty large">任务已结束，结果已写入主系统。请在3000刷新查看。</div>}
+          {["completed", "returned", "rejected", "cancelled"].includes(selected.status) && <div className="empty large">任务已结束，结果已写入主系统。请返回主系统刷新查看。</div>}
         </>}
       </section>
     </main>

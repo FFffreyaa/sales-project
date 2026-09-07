@@ -48,6 +48,7 @@ yarn-error.log*
 .*.err.log
 .*.pid
 /dist-integration-lab/
+/public/integration-lab/
 /.runtime/
 /.codex_tmp/
 

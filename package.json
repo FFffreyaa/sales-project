@@ -9,7 +9,7 @@
     "dev": "vinext dev",
     "lab:dev": "vite --config integration-lab/vite.config.ts --host 127.0.0.1 --port 3010",
     "lead:fixtures:import": "node scripts/import-company-lead-fixtures.mjs",
-    "build": "vinext build",
+    "build": "pnpm run lab:build && vinext build",
     "lab:build": "vite build --config integration-lab/vite.config.ts",
     "start": "vinext start",
     "test": "pnpm run build && pnpm run lab:build && node --experimental-strip-types --test tests/*.test.mjs",
@@ -23,7 +23,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply DB --config wrangler.jsonc --local --persist-to .wrangler/state",
     "preview:d1": "pnpm run build && wrangler dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --port 3000",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern dist-integration-lab --ignore-pattern .next --ignore-pattern .wrangler"
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern dist-integration-lab --ignore-pattern public/integration-lab --ignore-pattern .next --ignore-pattern .wrangler"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
