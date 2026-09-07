@@ -9,7 +9,7 @@
     "dev": "vinext dev",
     "lab:dev": "vite --config integration-lab/vite.config.ts --host 127.0.0.1 --port 3010",
     "lead:fixtures:import": "node scripts/import-company-lead-fixtures.mjs",
-    "demo:bootstrap:public": "node scripts/bootstrap-public-demo.mjs",
+    "demo:bootstrap:public": "pwsh -NoProfile -File scripts/bootstrap-public-demo.ps1",
     "build": "vite build --config integration-lab/vite.config.ts && vinext build",
     "lab:build": "vite build --config integration-lab/vite.config.ts",
     "start": "vinext start",
